@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
+
 import 'colors.dart';
 
 class LoginPage extends StatefulWidget {
@@ -36,28 +37,30 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Image.asset('assets/diamond.png'),
                 SizedBox(height: 16.0),
-                Text('SHRINE'),
+                Text(
+                  'SHRINE',
+                  style: Theme.of(context).textTheme.headline,
+                ),
               ],
             ),
             SizedBox(height: 120.0),
-            // TODO: Wrap Username with AccentColorOverride (103)
-            // TODO: Remove filled: true values (103)
-            // TODO: Wrap Password with AccentColorOverride (103)
             AccentColorOverride(
               color: kShrineBrown900,
               child: TextField(
-                decoration: InputDecoration(labelText: 'Username'),
                 controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                ),
               ),
             ),
-            SizedBox(
-              height: 12,
-            ),
+            SizedBox(height: 12.0),
             AccentColorOverride(
               color: kShrineBrown900,
               child: TextField(
-                decoration: InputDecoration(labelText: 'Password'),
                 controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                ),
                 obscureText: true,
               ),
             ),
@@ -66,9 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                 FlatButton(
                   child: Text('CANCEL'),
                   shape: BeveledRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8.0),
-                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
                   onPressed: () {
                     _usernameController.clear();
@@ -77,14 +78,16 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 RaisedButton(
                   child: Text('NEXT'),
-                  shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(7.0))),
                   elevation: 8.0,
+                  shape: BeveledRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -92,10 +95,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// TODO: Add AccentColorOverride (103)
 class AccentColorOverride extends StatelessWidget {
   const AccentColorOverride({Key key, this.color, this.child})
       : super(key: key);
+
   final Color color;
   final Widget child;
 
@@ -103,8 +106,10 @@ class AccentColorOverride extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       child: child,
-      data: Theme.of(context)
-          .copyWith(accentColor: color, brightness: Brightness.dark),
+      data: Theme.of(context).copyWith(
+        accentColor: color,
+        brightness: Brightness.dark,
+      ),
     );
   }
 }
