@@ -1,3 +1,4 @@
+import 'package:Shrine/login.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -29,9 +30,10 @@ class Backdrop extends StatefulWidget {
 }
 
 class _FrontLayer extends StatelessWidget {
-  const _FrontLayer({Key key, this.child}) : super(key: key);
+  const _FrontLayer({Key key, this.child, this.onTap}) : super(key: key);
 
   final Widget child;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,14 @@ class _FrontLayer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Container(
+              height: 40.0,
+              alignment: AlignmentDirectional.centerStart,
+            ),
+          ),
           Expanded(
             child: child,
           ),
@@ -103,6 +113,7 @@ class _BackdropState extends State<Backdrop>
         PositionedTransition(
           rect: layerAnimation,
           child: _FrontLayer(
+            onTap: _toggleBackdropLayerVisibility,
             child: widget.frontLayer,
           ),
         )
@@ -111,20 +122,28 @@ class _BackdropState extends State<Backdrop>
   }
 
   @override
+  void didUpdateWidget(Backdrop old) {
+    super.didUpdateWidget(old);
+
+    if (widget.currentCategory != old.currentCategory) {
+      _toggleBackdropLayerVisibility();
+    } else if (!_frontLayerVisible) {
+      _controller.fling(velocity: _kFlingVelocity);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     var appBar = AppBar(
       brightness: Brightness.light,
       elevation: 0.0,
       titleSpacing: 0.0,
-      // TODO: Remove leading property (104)
-      // TODO: Create title with _BackdropTitle parameter (104)
-      leading: IconButton(
-        icon: Icon(
-          Icons.menu,
-        ),
-        onPressed: _toggleBackdropLayerVisibility,
+      title: _BackdropTile(
+        listenable: _controller.view,
+        onPress: _toggleBackdropLayerVisibility,
+        frontTitle: widget.frontTitle,
+        backTitle: widget.backTitle,
       ),
-      title: Text('SHRINE'),
       actions: <Widget>[
         // TODO: Add shortcut to login screen from trailing icons (104)
         IconButton(
@@ -133,7 +152,12 @@ class _BackdropState extends State<Backdrop>
             semanticLabel: 'search',
           ),
           onPressed: () {
-            // TODO: Add open login (104)
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => LoginPage(),
+              ),
+            );
           },
         ),
         IconButton(
@@ -142,15 +166,97 @@ class _BackdropState extends State<Backdrop>
             semanticLabel: 'filter',
           ),
           onPressed: () {
-            // TODO: Add open login (104)
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => LoginPage(),
+              ),
+            );
           },
         ),
       ],
     );
     return Scaffold(
       appBar: appBar,
-      // TODO: Return a LayoutBuilder widget (104)
       body: LayoutBuilder(builder: _buildStack),
+    );
+  }
+}
+
+class _BackdropTile extends AnimatedWidget {
+  final Function onPress;
+  final Widget frontTitle;
+  final Widget backTitle;
+
+  const _BackdropTile(
+      {Key key,
+      Listenable listenable,
+      this.onPress,
+      @required this.frontTitle,
+      @required this.backTitle})
+      : assert(frontTitle != null),
+        assert(backTitle != null),
+        super(key: key, listenable: listenable);
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> animation = this.listenable;
+
+    return DefaultTextStyle(
+      style: Theme.of(context).primaryTextTheme.title,
+      softWrap: false,
+      overflow: TextOverflow.ellipsis,
+      child: Row(
+        children: <Widget>[
+          SizedBox(
+            width: 72.0,
+            child: IconButton(
+                padding: EdgeInsets.only(right: 8.0),
+                onPressed: this.onPress,
+                icon: Stack(
+                  children: <Widget>[
+                    Opacity(
+                      opacity: animation.value,
+                      child: ImageIcon(AssetImage('assets/slanted_menu.png')),
+                    ),
+                    FractionalTranslation(
+                      translation: Tween<Offset>(
+                              begin: Offset.zero, end: Offset(1.0, 0.0))
+                          .evaluate(animation),
+                      child: ImageIcon(AssetImage('assets/diamond.png')),
+                    )
+                  ],
+                )),
+          ),
+          Stack(
+            children: <Widget>[
+              Opacity(
+                opacity: CurvedAnimation(
+                        parent: ReverseAnimation(animation),
+                        curve: Interval(0.5, 1.0))
+                    .value,
+                child: FractionalTranslation(
+                  translation:
+                      Tween<Offset>(begin: Offset.zero, end: Offset(0.5, 0))
+                          .evaluate(animation),
+                  child: backTitle,
+                ),
+              ),
+              Opacity(
+                opacity: CurvedAnimation(
+                        parent: animation, curve: Interval(0.5, 1.0))
+                    .value,
+                child: FractionalTranslation(
+                  translation:
+                      Tween<Offset>(begin: Offset(-0.25, 0), end: Offset.zero)
+                          .evaluate(animation),
+                  child: frontTitle,
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }

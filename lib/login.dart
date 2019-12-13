@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
             ButtonBar(
               children: <Widget>[
                 FlatButton(
-                  child: Text('CANCEL'),
+                  child: Text('CANCEL', style: Theme.of(context).textTheme.button,),
                   shape: BeveledRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(7.0)),
                   ),
